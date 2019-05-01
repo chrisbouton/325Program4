@@ -5,7 +5,7 @@
 
 class Vertex:
     def __init__(self, data):
-        self.data = data
+        self.vertex = data
         self.found = False
 
     def getData(self):
@@ -33,4 +33,10 @@ class Edge:
     def setDest(self, dest):
         self.dest = dest
 
+    ##might not be right
+    def getEndPoints(self):
+        return self.getOrigin(), self.getDest()
+    
 
+##directed weighted graph class
+class Graph:
