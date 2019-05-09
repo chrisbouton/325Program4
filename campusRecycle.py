@@ -4,10 +4,9 @@
 #Program 4: Campus Recycling
 
 import csv
-from enum import IntEnum
 
 #data = vertex
-class Vertex(IntEnum):
+class Vertex():
     def __init__(self, data, index):
         self.data = data
         self.edges = LinkedList()
@@ -226,19 +225,18 @@ class Stack:
 class Graph:
     
     def __init__(self, numv, adj, buildings):
-        Vertices = []
-
+        self.Vertices = []
         self.numV = numv
         #iterating through matrix and creating vertex and edge objects
         i = 0
         j = 0
         while(i < numv):
-            Vertices.append(Vertex(buildings[i], i))
+            self.Vertices.append(Vertex(buildings[i], i))
             
             while(j < numv):
                 if(adj[i][j] != 1000 or adj[i][j] != 0):
                     z = Edge(adj[i][j], i, j)
-                    Vertices[i].edges.push(z)
+                    self.Vertices[i].edges.push(z)
 
                 j = j + 1
             i = i + 1
@@ -261,13 +259,20 @@ class Graph:
             j = j+1
             
         return None
+
+    #returns vertex based on index provided
+    def getVertex(self, index):
+        for vertex in self.Vertices:
+            if (vertex.index == index):
+                return vertex
+        return None
     
     def addEdge(self, weight):
 
        # happens in constructor
         pass
 
-    ##function to return all (outgoing) edges of a vertex
+    ##function to return all (outgoing) edges of a vertex in a list of the edge objects
     def incidentEdges(self, v):
         incidentEdgeList = []
         j = 0
@@ -275,17 +280,65 @@ class Graph:
             incidentEdgeList.append(v.edges.goTo(j))
         return incidentEdgeList
 
+    #depth first search function 
+    def DFS(self, startV, numV):
+        stack = Stack(numV)
 
+        ##bool array to keep track of visted vertices
+        seen = [False] * numV
+        seen[startV.index] = True
+        stack.push(startV)
+        while (stack.size() != 0):
+            # Pop new node from stack
+            curV = stack.pop()
+            # Visit new node
+            # ??? 
+            # Get neighbors
+            edges = curV.edges
+            i = 0
+            while (i < edges.numItems):
+                # Get index of destination at edge with index i
+                # then returns vertex object corresponding to that index
+                neighbor = self.getVertex(edges.goTo(i).data.getDest())
+                if (seen[neighbor.index] == False):
+                    seen[neighbor.index] = True
+                    stack.push(neighbor)
+                i += 1
+        print(seen)
+        return ()
+
+    def BFS(self, startV, numV):
+        queue = Queue()
+        seen = [False] * numV
+        seen[startV.index] = True
+        queue.enqueue(startV)
+        while (queue.length != 0):
+            curV = queue.dequeue()
+            # Visit new node
+            # ???
+            # Get neighbors
+            edges = curV.edges
+            i = 0 
+            while (i < edges.numItems):
+                # Get index of destination at edge with index i
+                # then returns vertex object corresponding to that index
+                neighbor = self.getVertex(edges.goTo(i).data.getDest())
+                if (seen[neighbor.index] == False):
+                    seen[neighbor.index] = True
+                    queue.enqueue(neighbor)
+                i += 1
+        print(seen)
+        return ()
 
 #######MAIN############
 ##open csv files with vertices and edges of La tech main campus academic buildings
 ##make adjacency list with indexes corresponding to vertices
+numV = 18
 adjMatrix = []
 buildings = []
 with open('AdjMatrix.csv', "r") as adjmat:
     reader = csv.reader(adjmat, delimiter=',')
-    
-    
+
     next(reader, None) #skip first row
 
     #remove letters from array rows and store in vertices
@@ -298,7 +351,11 @@ with open('AdjMatrix.csv', "r") as adjmat:
 #convert to int
 adjMatrix = [[int(j) for j in i] for i in adjMatrix]
 
-print (buildings)
-print (adjMatrix)
-gang = Graph(18, adjMatrix, buildings)
+# print (buildings)
+# print (adjMatrix)
+##command to intiate static graph of buildings in the constructor of Graph
+gang = Graph(numV, adjMatrix, buildings)
+gang.BFS(gang.Vertices[0], numV)
+gang.DFS(gang.Vertices[0], numV)
+#print (gang.DFS(gang.Vertices[0], numV))
 
