@@ -3,14 +3,17 @@
 #Advanced Data Structures 325
 #Program 4: Campus Recycling
 
+import csv
+from enum import IntEnum
 
 #data = vertex
-class Vertex:
-    def __init__(self, data):
+class Vertex(IntEnum):
+    def __init__(self, data, index):
         self.data = data
         self.edges = LinkedList()
         self.found = False
-
+        self.index = index
+        
     def getData(self):
         return self.data
 
@@ -18,12 +21,18 @@ class Vertex:
         self.data = data
     
 
-class Edge(Vertex):
+class Edge:
     def __init__(self, weight, origin=None, dest=None):
         self.origin = origin
         self.dest = dest
         self.weight = weight
        # self.node = Node()
+    
+    def getWeight(self):
+        return self.weight
+    
+    def setWeight(self, w):
+        self.weight = w
     
     def getOrigin(self):
         return self.origin
@@ -144,29 +153,32 @@ class QNode(object):
 
 
 class Queue(object):
-  def __init__(self):
-    self.length = 0
-    self.head = None
-    self.tail = None
+    
+    def __init__(self):
+        self.length = 0
+        self.head = None
+        self.tail = None
 
-  def enqueue(self, x):
-    newNode = QNode(x)
-    if self.head == None:
-      self.head = self.tail = newNode
-    else:
-      self.tail.next = newNode
-      newNode.previous = self.tail
-      self.tail = newNode
-    self.length += 1
+    def enqueue(self, x):
+        newNode = QNode(x)
+        if self.head == None:
+            self.head = self.tail = newNode
+        else:
+            self.tail.next = newNode
+            newNode.previous = self.tail
+            self.tail = newNode
+        self.length += 1
 
 
-  def dequeue (self):
-    item = self.head.item
-    self.head = self.head.next 
-    self.length -= 1
-    if self.length == 0:
-      self.last = None
-    return item
+    def dequeue (self):
+        item = self.head.item
+        self.head = self.head.next 
+        self.length -= 1
+        if self.length == 0:
+            self.last = None
+        return item
+
+
 
 ##stack class site <https://www.pythoncentral.io/stack-tutorial-python-implementation/>
 class Stack:
@@ -211,10 +223,27 @@ class Stack:
 # print(s.pop())#prints 8
 # print(s.pop())#prints 7
 #directed weighted graph class
-class Graph(Edge):
-    def __init__(self, numV, adj):
-        self.numV = numV
-        self.adj[][] = adj
+class Graph:
+    
+    def __init__(self, numv, adj, buildings):
+        Vertices = []
+
+        self.numV = numv
+        #iterating through matrix and creating vertex and edge objects
+        i = 0
+        j = 0
+        while(i < numv):
+            Vertices.append(Vertex(buildings[i], i))
+            
+            while(j < numv):
+                if(adj[i][j] != 1000 or adj[i][j] != 0):
+                    z = Edge(adj[i][j], i, j)
+                    Vertices[i].edges.push(z)
+
+                j = j + 1
+            i = i + 1
+
+       
 
     def getNumV(self):
         return self.numV
@@ -223,23 +252,53 @@ class Graph(Edge):
         self.numV = v
     
     ##function that takes 2 vertices and returns edge connecting or null if not adjacent
+    #returns edge that is going out of v1 to v2
     def getEdge(self, v1, v2):
-        pass
+        j = 0
+        while(v1.edges.goTo(j).dest != None):
+            if(v1.edges.goTo(j).dest == v2.index):
+                return v1.edges.goTo(j)
+            j = j+1
+            
+        return None
     
     def addEdge(self, weight):
 
-       # newEdge = Edge(weight)
+       # happens in constructor
         pass
 
     ##function to return all (outgoing) edges of a vertex
     def incidentEdges(self, v):
-        pass 
+        incidentEdgeList = []
+        j = 0
+        while(v.edges.goTo(j) != None):
+            incidentEdgeList.append(v.edges.goTo(j))
+        return incidentEdgeList
+
 
 
 #######MAIN############
-##calculate adjacency list of vertex and edges[]
-a = Vertex("A")
-b = Vertex("B")
-c = Vertex("C")
-d = Vertex("D")
-adjList = LinkedList()
+##open csv files with vertices and edges of La tech main campus academic buildings
+##make adjacency list with indexes corresponding to vertices
+adjMatrix = []
+buildings = []
+with open('AdjMatrix.csv', "r") as adjmat:
+    reader = csv.reader(adjmat, delimiter=',')
+    
+    
+    next(reader, None) #skip first row
+
+    #remove letters from array rows and store in vertices
+    for row in reader:
+        buildings.append(row[0])
+        adjMatrix.append(row[1:19])
+
+    #skips the first row
+
+#convert to int
+adjMatrix = [[int(j) for j in i] for i in adjMatrix]
+
+print (buildings)
+print (adjMatrix)
+gang = Graph(18, adjMatrix, buildings)
+
