@@ -1,0 +1,16 @@
+TO ADD CHANGES TO GITHUB
+
+git add (file)
+
+git status
+
+git commit -m "message"
+
+git push
+
+
+
+
+to get
+
+git clone (link on github) into most updated folder
