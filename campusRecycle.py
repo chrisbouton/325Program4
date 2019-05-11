@@ -143,6 +143,12 @@ class LinkedList:
         
         return self.curr
 
+    # def iterate(self):
+    #     self.curr = self.head
+    #     i = 0
+    #     while(i < self.numItems):
+
+
 ##got queue class from <https://stackoverflow.com/questions/45688871/implementing-an-efficient-queue-in-python>
 class QNode(object):
   def __init__(self, item = None):
@@ -227,6 +233,8 @@ class Graph:
     def __init__(self, numv, adj, buildings):
         self.Vertices = []
         self.numV = numv
+        self.buildings = buildings
+        self.adj = adj
         #iterating through matrix and creating vertex and edge objects
         i = 0
         j = 0
@@ -298,7 +306,7 @@ class Graph:
             i = 0
             while (i < edges.numItems):
                 # Get index of destination at edge with index i
-                # then returns vertex object corresponding to that index
+                # then returns vertex object corresponding to that index, outgoing edges btw
                 neighbor = self.getVertex(edges.goTo(i).data.getDest())
                 if (seen[neighbor.index] == False):
                     seen[neighbor.index] = True
@@ -316,7 +324,7 @@ class Graph:
             curV = queue.dequeue()
             # Visit new node
             # ???
-            # Get neighbors
+            # Get neighbor's Linked List
             edges = curV.edges
             i = 0 
             while (i < edges.numItems):
@@ -330,6 +338,80 @@ class Graph:
         print(seen)
         return ()
 
+    def Dijkstra(self, source, prevCost, currPath):
+        for index, vertex in enumerate(self.Vertices):
+            if ((self.adj[source][index] + prevCost < 1000) and (self.adj[source][index] + prevCost) < cost[index]):
+                cost[index] = self.adj[source][index] + prevCost
+                sinktree[index] = currPath + "," + buildings[index]
+
+                #For each of the primary neighbors, run the Dijkstra algorithm again to 
+                #check for additional paths
+                self.Dijkstra(index, cost[index], sinktree[index])
+
+            #basically BFS
+            #check neighbors of neighbors
+            index = 0
+            curEdges = self.Vertices[source].edges
+            while (index < curEdges.numItems):
+                curEdge = curEdges.goTo(index).data
+                neighborIndex = curEdge.dest
+                neighbor = self.getVertex(neighborIndex)
+                #If the node is a neighbor of a neighbor and the overall cost is less than the 
+                #current cost, then it is a shorter path:
+                if ((cost[index] + curEdge.weight + prevCost) < 1000) and ((cost[index] + curEdge.weight + prevCost) < cost[neighborIndex]):
+                    cost[neighborIndex] = cost[index] + curEdge.weight + prevCost	
+                    sinktree[neighborIndex] = sinktree[index] + buildings[neighborIndex]
+
+                    #For each of the neighbor's neighbors, run the Dijkstra function again
+                    #to check for additional paths
+                    self.Dijkstra(neighborIndex, cost[neighborIndex], sinktree[neighborIndex])
+                index += 1
+        return sinktree
+
+
+
+
+
+        # #set all costs to "inf"
+        # cost = [1000]* (self.numV)
+        # #Set all paths to blank:
+        # sinktree = [-1]*(self.numV)
+        # #array to keep track of visited vertices
+        # #known = [False] * (self.numV)
+
+        # cost[source] = 0
+        # sinktree[source] = self.buildings[source]
+
+        # # Get source Vertex:
+        # sourceV = self.getVertex(source)
+        # #Check for primary neighbors:
+		# #If there is a direct cost to source, then it is a primary neighbor and
+		# #if the direct cost is less than the current, the path is shorter:
+        # #VISIT each node
+       
+        # queue = Queue()
+        # seen = [False] * numV
+        # seen[source] = True
+        # queue.enqueue(self.Vertices[source])
+        # while (queue.length != 0):
+        #     curV = queue.dequeue()
+        #     # Visit new node
+        #     if(((self.getEdge(sourceV, curV).weight + prevCost) < 1000) and (self.getEdge(sourceV, curV).weight + prevCost) < cost[curV.index]):
+        #         cost[curV.index] = self.getEdge(sourceV, curV).weight + prevCost
+        #         sinktree[index] = currPath + str(curV.index)
+        #     # Get neighbor's Linked List
+        #     edges = curV.edges
+        #     i = 0 
+        #     while (i < edges.numItems):
+        #         # Get index of destination at edge with index i
+        #         # then returns vertex object corresponding to that index
+        #         neighbor = self.getVertex(edges.goTo(i).data.getDest())
+        #         if (seen[neighbor.index] == False):
+        #             seen[neighbor.index] = True
+        #             queue.enqueue(neighbor)
+        #         i += 1
+
+        
 #######MAIN############
 ##open csv files with vertices and edges of La tech main campus academic buildings
 ##make adjacency list with indexes corresponding to vertices
@@ -359,3 +441,51 @@ gang.BFS(gang.Vertices[0], numV)
 gang.DFS(gang.Vertices[0], numV)
 #print (gang.DFS(gang.Vertices[0], numV))
 
+##dijkstras 
+k = 0
+for build in buildings:
+    print ("{}={}".format(build, k))
+    k +=1
+#set all costs to "inf"
+cost = [1000]* (gang.numV)
+#Set all paths to blank:
+sinktree = [-1]*(gang.numV)
+dij = input("Enter start building's index for Dijkstras algorithim\n")
+dij = int(dij)
+cost[dij] = 0
+sinktree[dij] = gang.buildings[dij]
+x = gang.Dijkstra(dij, 0, buildings[dij])
+i = 0
+for item in x:
+    print(item)
+    print(cost[i])
+    i += 1
+
+
+
+
+
+
+# for index, vertex in enumerate(self.Vertices):
+#             if ((self.adj[source][index] + prevCost < 1000) and (self.adj[source][index] + prevCost) < cost[index]):
+#                 cost[index] = self.adj[source][index] + prevCost
+#                 sinktree[index] = currPath + "," + buildings[index]
+
+#                 #For each of the primary neighbors, run the Dijkstra algorithm again to 
+#                 #check for additional paths
+#                 self.Dijkstra(index, cost[index], sinktree[index])
+
+#             #basically BFS
+#             #check neighbors of neighbors
+#             for neighborIndex, neighbor in enumerate(self.Vertices[source].edges):
+#             #If the node is a neighbor of a neighbor and the overall cost is less than the 
+#             #current cost, then it is a shorter path:
+#                 if ((cost[index] + neighbor + prevCost) < 1000) and ((cost[index] + neighbor + prevCost) < cost[neighborIndex]):
+#                     cost[neighborIndex] = cost[index] + neighbor + prevCost	
+#                     sinktree[neighborIndex] = sinktree[index] + buildings[neighborIndex]
+
+#                     #For each of the neighbor's neighbors, run the Dijkstra function again
+#                     #to check for additional paths
+#                     self.Dijkstra(neighborIndex, cost[neighborIndex], sinktree[neighborIndex])
+
+#         return sinktree
