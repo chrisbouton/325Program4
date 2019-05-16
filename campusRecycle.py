@@ -4,6 +4,7 @@
 #Program 4: Campus Recycling
 
 import csv
+import time
 
 #data = vertex
 class Vertex():
@@ -299,6 +300,7 @@ class Graph:
         while (stack.size() != 0):
             # Pop new node from stack
             curV = stack.pop()
+            print (curV.data)
             # Visit new node
             # ??? 
             # Get neighbors
@@ -312,7 +314,10 @@ class Graph:
                     seen[neighbor.index] = True
                     stack.push(neighbor)
                 i += 1
-        print(seen)
+        
+        print(seen),
+        print("visited bool array") 
+        
         return ()
 
     def BFS(self, startV, numV):
@@ -322,6 +327,7 @@ class Graph:
         queue.enqueue(startV)
         while (queue.length != 0):
             curV = queue.dequeue()
+            print (curV.data)
             # Visit new node
             # ???
             # Get neighbor's Linked List
@@ -335,11 +341,12 @@ class Graph:
                     seen[neighbor.index] = True
                     queue.enqueue(neighbor)
                 i += 1
-        print(seen)
+        print(seen),
+        print("visited bool array ^^^^^")
         return ()
 
     def Dijkstra(self, source, prevCost, currPath):
-        for index, in enumerate(self.Vertices):
+        for index, vertex in enumerate(self.Vertices):
             if ((self.adj[source][index] + prevCost < 1000) and (self.adj[source][index] + prevCost) < cost[index]):
                 cost[index] = self.adj[source][index] + prevCost
                 sinktree[index] = currPath + "," + buildings[index]
@@ -368,48 +375,36 @@ class Graph:
                 index += 1
         return sinktree
 
+    def slowDijkstra(self, source, prevCost, currPath):
+        for index,vertex in enumerate(self.Vertices):
+            if ((self.adj[source][index] + prevCost < 1000) and (self.adj[source][index] + prevCost) > cost[index]):
+                cost[index] = self.adj[source][index] + prevCost
+                sinktree[index] = currPath + "," + buildings[index]
 
+                #For each of the primary neighbors, run the Dijkstra algorithm again to 
+                #check for additional paths
+                self.Dijkstra(index, cost[index], sinktree[index])
 
+            #basically BFS
+            #check neighbors of neighbors
+            index = 0
+            curEdges = self.Vertices[source].edges
+            while (index < curEdges.numItems):
+                curEdge = curEdges.goTo(index).data
+                neighborIndex = curEdge.dest
+                #neighbor = self.getVertex(neighborIndex)
+                #If the node is a neighbor of a neighbor and the overall cost is less than the 
+                #current cost, then it is a shorter path:
+                if ((cost[index] + curEdge.weight + prevCost) < 1000) and ((cost[index] + curEdge.weight + prevCost) > cost[neighborIndex]):
+                    cost[neighborIndex] = cost[index] + curEdge.weight + prevCost	
+                    sinktree[neighborIndex] = sinktree[index] + buildings[neighborIndex]
 
+                    #For each of the neighbor's neighbors, run the Dijkstra function again
+                    #to check for additional paths
+                    self.Dijkstra(neighborIndex, cost[neighborIndex], sinktree[neighborIndex])
+                index += 1
+        return sinktree
 
-        # #set all costs to "inf"
-        # cost = [1000]* (self.numV)
-        # #Set all paths to blank:
-        # sinktree = [-1]*(self.numV)
-        # #array to keep track of visited vertices
-        # #known = [False] * (self.numV)
-
-        # cost[source] = 0
-        # sinktree[source] = self.buildings[source]
-
-        # # Get source Vertex:
-        # sourceV = self.getVertex(source)
-        # #Check for primary neighbors:
-		# #If there is a direct cost to source, then it is a primary neighbor and
-		# #if the direct cost is less than the current, the path is shorter:
-        # #VISIT each node
-       
-        # queue = Queue()
-        # seen = [False] * numV
-        # seen[source] = True
-        # queue.enqueue(self.Vertices[source])
-        # while (queue.length != 0):
-        #     curV = queue.dequeue()
-        #     # Visit new node
-        #     if(((self.getEdge(sourceV, curV).weight + prevCost) < 1000) and (self.getEdge(sourceV, curV).weight + prevCost) < cost[curV.index]):
-        #         cost[curV.index] = self.getEdge(sourceV, curV).weight + prevCost
-        #         sinktree[index] = currPath + str(curV.index)
-        #     # Get neighbor's Linked List
-        #     edges = curV.edges
-        #     i = 0 
-        #     while (i < edges.numItems):
-        #         # Get index of destination at edge with index i
-        #         # then returns vertex object corresponding to that index
-        #         neighbor = self.getVertex(edges.goTo(i).data.getDest())
-        #         if (seen[neighbor.index] == False):
-        #             seen[neighbor.index] = True
-        #             queue.enqueue(neighbor)
-        #         i += 1
 
         
 #######MAIN############
@@ -437,7 +432,9 @@ adjMatrix = [[int(j) for j in i] for i in adjMatrix]
 # print (adjMatrix)
 ##command to intiate static graph of buildings in the constructor of Graph
 gang = Graph(numV, adjMatrix, buildings)
+print("!!!!!!BREADTH FIRST SEARCH!!!!!!!!!!")
 gang.BFS(gang.Vertices[0], numV)
+print ("!!!!!!!!!!DEPTH FIRST SEARCH!!!!!!!!!!")
 gang.DFS(gang.Vertices[0], numV)
 #print (gang.DFS(gang.Vertices[0], numV))
 
@@ -446,21 +443,36 @@ k = 0
 for build in buildings:
     print ("{}={}".format(build, k))
     k +=1
+
+
+#Dijkstra's algorithim pre setup
 #set all costs to "inf"
 cost = [1000]* (gang.numV)
 #Set all paths to blank:
 sinktree = [-1]*(gang.numV)
 print("################")
-dij = input("Enter start building's index for Dijkstras algorithim\n")
+dij = input("Enter start building's index for Dijkstras shortest and longest path algorithim\n")
 dij = int(dij)
 cost[dij] = 0
 sinktree[dij] = gang.buildings[dij]
+start = time.time()
 x = gang.Dijkstra(dij, 0, buildings[dij])
+end = time.time()
+DijElapsed = end - start
 i = 0
+print("QUICKEST ROUTE FROM DESIRED START BUILDING")
 for item in x:
     print("Path: {}".format(item))
     print("{} 10ths of a mile".format(cost[i]))
     i += 1
+y = gang.slowDijkstra(dij, 0, buildings[dij])
+
+j = 0
+print("SLOWEST ROUTE FROM DESIRED START BUILDING")
+for item in y:
+    print("Path: {}".format(item))
+    print("{} 10ths of a mile".format(cost[j]))
+    j += 1
 
 
 
