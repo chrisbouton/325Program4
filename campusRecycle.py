@@ -236,6 +236,9 @@ class Graph:
         self.numV = numv
         self.buildings = buildings
         self.adj = adj
+
+        #variable to store prim end time
+        self.end1 = 0
         #iterating through matrix and creating vertex and edge objects
         i = 0
         j = 0
@@ -405,6 +408,69 @@ class Graph:
                 index += 1
         return sinktree
 
+    # A utility function to print the constructed MST stored in parent[] 
+    def printMST(self, parent): 
+        weight = 0
+        print("\nPRIM MST, starting from V[0]")
+        print ("Edge \tWeight")
+        for i in range(1, len(self.Vertices)): 
+            weight += self.adj[parent[i]][i]
+            print ("{} - {} \t {}".format(parent[i],i, self.adj[parent[i]][i])) 
+
+#i used the python data structures textbook ch14.7 and <https://www.geeksforgeeks.org/prims-minimum-spanning-tree-mst-greedy-algo-5/> for reference
+    #UTILITY FUNCTION FROM primMST
+    def minKey(self, key, mstSet):
+        min = 1000
+        
+        for v in range(len(self.Vertices)): 
+            if ((key[v] < min) and (mstSet[v] == False)):
+                min = key[v] 
+                min_index = v 
+       
+        return min_index 
+  
+
+    
+    def primMST(self):
+        #array to pick minimum weight of edges
+        key = [1000] * (self.numV)
+
+        #array to store constructed MST
+        parent = [None] * (self.numV)
+        
+        #start with first index of vertices
+        key[0] = 0
+        mstSet = [False]*(self.numV)
+
+        #make first node root of MST
+        parent[0] = -1
+
+        for mainLoop in range(len(self.Vertices)):
+            # Pick the minimum distance vertex from  
+            # the set of vertices not yet processed.  
+            # u is always equal to src in first iteration 
+            u = self.minKey(key, mstSet)
+            
+            # Put the minimum distance vertex in  
+            # the shortest path tree 
+            mstSet[u] = True
+
+            # Update dist value of the adjacent vertices  
+            # of the picked vertex only if the current  
+            # distance is greater than new distance and 
+            # the vertex in not in the shotest path tree 
+            for v in range(len(self.Vertices)): 
+                # graph[u][v] is non zero only for adjacent vertices of m 
+                # mstSet[v] is false for vertices not yet included in MST 
+                # Update the key only if graph[u][v] is smaller than key[v] 
+                if ((self.adj[u][v] < 1000) and (mstSet[v] == False and key[v] > self.adj[u][v]) and (self.adj[u][v] != 0)): 
+                        key[v] = self.adj[u][v] 
+                        parent[v] = u 
+        
+        self.end1 = time.time()
+        self.printMST(parent) 
+
+
 
         
 #######MAIN############
@@ -460,7 +526,7 @@ x = gang.Dijkstra(dij, 0, buildings[dij])
 end = time.time()
 DijElapsed = end - start
 i = 0
-print("QUICKEST ROUTE FROM DESIRED START BUILDING")
+print("\nQUICKEST ROUTE FROM DESIRED START BUILDING")
 for item in x:
     print("Path: {}".format(item))
     print("{} 10ths of a mile".format(cost[i]))
@@ -468,13 +534,13 @@ for item in x:
 y = gang.slowDijkstra(dij, 0, buildings[dij])
 
 j = 0
-print("SLOWEST ROUTE FROM DESIRED START BUILDING")
+print("\nSLOWEST ROUTE FROM DESIRED START BUILDING")
 for item in y:
     print("Path: {}".format(item))
     print("{} 10ths of a mile".format(cost[j]))
     j += 1
+start1 = time.time()
+gang.primMST()
+primElapsed = gang.end1 - start1
 
-
-
-
-
+print("Time analysis in(s) of Dij vs Prim = {} to {}".format(DijElapsed, primElapsed))
